@@ -1,8 +1,9 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
 from django.shortcuts import get_object_or_404
+from rest_framework import status
 from rest_framework.decorators import api_view
-
+from rest_framework.response import Response
 
 from .models import Product, Order, OrderProduct
 
@@ -72,12 +73,15 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     data = request.data
-    if not 'products' in data:
-        raise ValueError('products key not found')
-    if not isinstance(data['products'], list):
-        raise ValueError('products is not list')
-    if isinstance(data['products'], list) and len(data['products']) == 0:
-        raise ValueError('products is an empty list')
+    try:
+        if not 'products' in data:
+            raise ValueError('products key not found')
+        if not isinstance(data['products'], list):
+            raise ValueError('products is not list')
+        if isinstance(data['products'], list) and len(data['products']) == 0:
+            raise ValueError('products is an empty list')
+    except ValueError as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     order = Order(
         address=data['address'],
