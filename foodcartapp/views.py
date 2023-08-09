@@ -72,6 +72,13 @@ def product_list_api(request):
 @api_view(['POST'])
 def register_order(request):
     data = request.data
+    if not 'products' in data:
+        raise ValueError('products key not found')
+    if not isinstance(data['products'], list):
+        raise ValueError('products is not list')
+    if isinstance(data['products'], list) and len(data['products']) == 0:
+        raise ValueError('products is an empty list')
+
     order = Order(
         address=data['address'],
         firstname=data['firstname'],
