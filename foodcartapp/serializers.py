@@ -1,10 +1,17 @@
 from rest_framework import serializers
-from phonenumber_field.serializerfields import PhoneNumberField
+
+from .models import Order, OrderProduct
 
 
-class OrderDeserializer(serializers.Serializer):
-    products = serializers.ListField(allow_empty=False)
-    firstname = serializers.CharField(allow_blank=False)
-    lastname = serializers.CharField(allow_blank=False)
-    phonenumber = PhoneNumberField(allow_blank=False)
-    address = serializers.CharField(allow_blank=False)
+class OrderProduct(serializers.ModelSerializer):
+    class Meta:
+        model = OrderProduct
+        fields = ['product', 'quantity']
+
+
+class OrderDeserializer(serializers.ModelSerializer):
+    products = OrderProduct(many=True, min_length=1)
+
+    class Meta:
+        model = Order
+        fields = '__all__'

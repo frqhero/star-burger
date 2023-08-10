@@ -1,9 +1,6 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
-from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import Serializer
 
 from .models import Product, Order, OrderProduct
 from .serializers import OrderDeserializer
@@ -73,23 +70,14 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    data = request.data
-
-
-    order_deserializer = OrderDeserializer(data=data)
+    order_deserializer = OrderDeserializer(data=request.data)
     order_deserializer.is_valid(raise_exception=True)
 
-    order = Order(
-        address=data['address'],
-        firstname=data['firstname'],
-        lastname=data['lastname'],
-        phonenumber=data['phonenumber'],
-    )
-    order.clean()
-    order.save()
-    for product in data['products']:
-        product_obj = get_object_or_404(Product, id=product['product'])
-        OrderProduct.objects.create(
-            order=order, product=product_obj, quantity=product['quantity']
-        )
+    data = order_deserializer.validated_data
+    products = data.pop('products')
+    order = Order.objects.create(**data)
+
+    order_products = [OrderProduct(order=order, **product) for product in products]
+    OrderProduct.objects.bulk_create(order_products)
+
     return JsonResponse({})
