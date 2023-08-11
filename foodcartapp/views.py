@@ -77,7 +77,18 @@ def register_order(request):
     products = data.pop('products')
     order = Order.objects.create(**data)
 
-    order_products = [OrderProduct(order=order, **product) for product in products]
+    order_products = [
+        OrderProduct(order=order, **product) for product in products
+    ]
     OrderProduct.objects.bulk_create(order_products)
 
-    return JsonResponse({})
+    serializer = OrderDeserializer(order)
+
+    return JsonResponse(
+        serializer.data,
+        json_dumps_params={
+            'indent': 2,
+            'ensure_ascii': False,
+        },
+        status=201
+    )

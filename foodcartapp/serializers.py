@@ -10,7 +10,7 @@ class OrderProduct(serializers.ModelSerializer):
 
 
 class OrderDeserializer(serializers.ModelSerializer):
-    products = OrderProduct(many=True, min_length=1)
+    products = OrderProduct(many=True, min_length=1, write_only=True)
 
     class Meta:
         model = Order
