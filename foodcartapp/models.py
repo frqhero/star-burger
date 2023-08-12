@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator
+from django.db.models import F, Sum
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -117,6 +118,16 @@ class OrderProduct(models.Model):
     quantity = models.PositiveIntegerField(verbose_name='количество')
 
 
+class OrderQuerySet(models.QuerySet):
+    def get_orders(self):
+        product_price = F('products__price')
+        product_quantity = F('orderproduct__quantity')
+        orders = Order.objects.annotate(
+            price=Sum(product_price * product_quantity)
+        )
+        return orders
+
+
 class Order(models.Model):
     products = models.ManyToManyField(
         Product,
@@ -128,6 +139,7 @@ class Order(models.Model):
     lastname = models.CharField(max_length=50, verbose_name='фамилия')
     phonenumber = PhoneNumberField(verbose_name='телефон')
     address = models.CharField(max_length=100, verbose_name='адрес')
+    objects = OrderQuerySet.as_manager()
 
     def clean(self):
         super().clean()
