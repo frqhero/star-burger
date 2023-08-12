@@ -78,7 +78,8 @@ def register_order(request):
     order = Order.objects.create(**data)
 
     order_products = [
-        OrderProduct(order=order, **product) for product in products
+        OrderProduct(order=order, price=product['product'].price, **product)
+        for product in products
     ]
     OrderProduct.objects.bulk_create(order_products)
 
@@ -90,5 +91,5 @@ def register_order(request):
             'indent': 2,
             'ensure_ascii': False,
         },
-        status=201
+        status=201,
     )

@@ -116,11 +116,17 @@ class OrderProduct(models.Model):
         Product, on_delete=models.CASCADE, verbose_name='товар'
     )
     quantity = models.PositiveIntegerField(verbose_name='количество')
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        default=0
+    )
 
 
 class OrderQuerySet(models.QuerySet):
     def get_orders(self):
-        product_price = F('products__price')
+        product_price = F('orderproduct__price')
         product_quantity = F('orderproduct__quantity')
         orders = Order.objects.annotate(
             price=Sum(product_price * product_quantity)
