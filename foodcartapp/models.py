@@ -1,6 +1,7 @@
-from django.db import models
 from django.core.validators import MinValueValidator
+from django.db import models
 from django.db.models import F, Sum, Q
+from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
 
 
@@ -156,6 +157,9 @@ class Order(models.Model):
         verbose_name='статус', choices=STATUS_CHOICES, default=1
     )
     comment = models.TextField(default='')
+    registered_at = models.DateTimeField(default=timezone.now)
+    called_at = models.DateTimeField(null=True, blank=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
 
     def clean(self):
         super().clean()
