@@ -155,6 +155,7 @@ class Order(models.Model):
     status = models.PositiveIntegerField(
         verbose_name='статус', choices=STATUS_CHOICES, default=1
     )
+    comment = models.TextField(default='')
 
     def clean(self):
         super().clean()
