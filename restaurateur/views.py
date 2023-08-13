@@ -93,8 +93,12 @@ def view_restaurants(request):
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.get_orders()
+    current_url = request.path
     return render(
         request,
         template_name='order_items.html',
-        context={'order_items': orders}
+        context={
+            'order_items': orders,
+            'current_url': current_url,
+        }
     )
