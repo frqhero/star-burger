@@ -157,9 +157,22 @@ class Order(models.Model):
         verbose_name='статус', choices=STATUS_CHOICES, default=1
     )
     comment = models.TextField(default='')
-    registered_at = models.DateTimeField(default=timezone.now)
-    called_at = models.DateTimeField(null=True, blank=True)
-    delivered_at = models.DateTimeField(null=True, blank=True)
+    registered_at = models.DateTimeField(
+        default=timezone.now, verbose_name='время создания'
+    )
+    called_at = models.DateTimeField(
+        null=True, blank=True, verbose_name='время звонка'
+    )
+    delivered_at = models.DateTimeField(
+        null=True, blank=True, verbose_name='время доставки'
+    )
+    PAYMENT_CHOICES = (
+        (1, 'Наличные'),
+        (2, 'Безналичные'),
+    )
+    payment_method = models.PositiveIntegerField(
+        verbose_name='способ оплаты', choices=PAYMENT_CHOICES, default=1
+    )
 
     def clean(self):
         super().clean()
