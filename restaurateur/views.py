@@ -1,4 +1,5 @@
 from django import forms
+from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -13,27 +14,30 @@ from foodcartapp.models import Product, Restaurant, Order
 
 class Login(forms.Form):
     username = forms.CharField(
-        label='Логин', max_length=75, required=True,
-        widget=forms.TextInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Укажите имя пользователя'
-        })
+        label='Логин',
+        max_length=75,
+        required=True,
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Укажите имя пользователя',
+            }
+        ),
     )
     password = forms.CharField(
-        label='Пароль', max_length=75, required=True,
-        widget=forms.PasswordInput(attrs={
-            'class': 'form-control',
-            'placeholder': 'Введите пароль'
-        })
+        label='Пароль',
+        max_length=75,
+        required=True,
+        widget=forms.PasswordInput(
+            attrs={'class': 'form-control', 'placeholder': 'Введите пароль'}
+        ),
     )
 
 
 class LoginView(View):
     def get(self, request, *args, **kwargs):
         form = Login()
-        return render(request, "login.html", context={
-            'form': form
-        })
+        return render(request, 'login.html', context={'form': form})
 
     def post(self, request):
         form = Login(request.POST)
@@ -46,13 +50,17 @@ class LoginView(View):
             if user:
                 login(request, user)
                 if user.is_staff:  # FIXME replace with specific permission
-                    return redirect("restaurateur:RestaurantView")
-                return redirect("start_page")
+                    return redirect('restaurateur:RestaurantView')
+                return redirect('start_page')
 
-        return render(request, "login.html", context={
-            'form': form,
-            'ivalid': True,
-        })
+        return render(
+            request,
+            'login.html',
+            context={
+                'form': form,
+                'ivalid': True,
+            },
+        )
 
 
 class LogoutView(auth_views.LogoutView):
@@ -70,29 +78,56 @@ def view_products(request):
 
     products_with_restaurant_availability = []
     for product in products:
-        availability = {item.restaurant_id: item.availability for item in product.menu_items.all()}
-        ordered_availability = [availability.get(restaurant.id, False) for restaurant in restaurants]
+        availability = {
+            item.restaurant_id: item.availability
+            for item in product.menu_items.all()
+        }
+        ordered_availability = [
+            availability.get(restaurant.id, False)
+            for restaurant in restaurants
+        ]
 
         products_with_restaurant_availability.append(
             (product, ordered_availability)
         )
 
-    return render(request, template_name="products_list.html", context={
-        'products_with_restaurant_availability': products_with_restaurant_availability,
-        'restaurants': restaurants,
-    })
+    return render(
+        request,
+        template_name='products_list.html',
+        context={
+            'products_with_restaurant_availability': products_with_restaurant_availability,
+            'restaurants': restaurants,
+        },
+    )
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_restaurants(request):
-    return render(request, template_name="restaurants_list.html", context={
-        'restaurants': Restaurant.objects.all(),
-    })
+    return render(
+        request,
+        template_name='restaurants_list.html',
+        context={
+            'restaurants': Restaurant.objects.all(),
+        },
+    )
 
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.get_orders()
+    for order in orders:
+        order_products = order.products.distinct()
+        restaurants = (
+            Restaurant.objects.filter(
+                menu_items__product__in=order_products,
+                menu_items__availability=True,
+            )
+            .annotate(
+                num_sandwiches=Count('menu_items__product', distinct=True)
+            )
+            .filter(num_sandwiches=len(order_products))
+        )
+        order.restaurants = restaurants
     current_url = request.path
     return render(
         request,
@@ -100,5 +135,5 @@ def view_orders(request):
         context={
             'order_items': orders,
             'current_url': current_url,
-        }
+        },
     )

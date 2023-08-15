@@ -129,9 +129,11 @@ class OrderQuerySet(models.QuerySet):
     def get_orders(self):
         product_price = F('orderproduct__price')
         product_quantity = F('orderproduct__quantity')
-        orders = Order.objects.annotate(
-            price=Sum(product_price * product_quantity)
-        ).filter(~Q(status=4))
+        orders = (
+            Order.objects.annotate(price=Sum(product_price * product_quantity))
+            .filter(~Q(status=4))
+            .order_by('status')
+        )
         return orders
 
 
@@ -172,6 +174,13 @@ class Order(models.Model):
     )
     payment_method = models.PositiveIntegerField(
         verbose_name='способ оплаты', choices=PAYMENT_CHOICES, default=1
+    )
+    restaurant = models.ForeignKey(
+        Restaurant,
+        on_delete=models.CASCADE,
+        verbose_name='ресторан приготовления',
+        null=True,
+        blank=True,
     )
 
     def clean(self):
