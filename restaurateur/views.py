@@ -4,10 +4,11 @@ from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import user_passes_test
-
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
-
+from django.conf import settings
+from geopy import distance
+import requests
 
 from foodcartapp.models import Product, Restaurant, Order
 
@@ -112,6 +113,25 @@ def view_restaurants(request):
     )
 
 
+def fetch_coordinates(address):
+    apikey = settings.YANDEX_GEOCODER_TOKEN
+    base_url = "https://geocode-maps.yandex.ru/1.x"
+    response = requests.get(base_url, params={
+        "geocode": address,
+        "apikey": apikey,
+        "format": "json",
+    })
+    response.raise_for_status()
+    found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+
+    if not found_places:
+        return None
+
+    most_relevant = found_places[0]
+    lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+    return lat, lon
+
+
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
     orders = Order.objects.get_orders()
@@ -127,7 +147,13 @@ def view_orders(request):
             )
             .filter(num_sandwiches=len(order_products))
         )
-        order.restaurants = restaurants
+        order.restaurants = list(restaurants)
+        for restaurant in order.restaurants:
+            restaurant_coords = fetch_coordinates(restaurant.address)
+            order_coords = fetch_coordinates(order.address)
+            order_distance = round(distance.distance(restaurant_coords, order_coords).km, 2)
+            restaurant.order_distance = order_distance
+        sorted(order.restaurants, key=lambda restaurant: restaurant.order_distance)
     current_url = request.path
     return render(
         request,
