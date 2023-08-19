@@ -75,18 +75,6 @@ def product_list_api(request):
 def register_order(request):
     order_deserializer = OrderDeserializer(data=request.data)
     order_deserializer.is_valid(raise_exception=True)
-
-    data = order_deserializer.validated_data
-    products = data.pop('products')
     with transaction.atomic():
-        order = Order.objects.create(**data)
-
-        order_products = [
-            OrderProduct(order=order, price=product['product'].price, **product)
-            for product in products
-        ]
-        OrderProduct.objects.bulk_create(order_products)
-
-    serializer = OrderDeserializer(order)
-
-    return Response(serializer.data, status=status.HTTP_201_CREATED)
+        order_deserializer.save()
+    return Response(order_deserializer.data, status=status.HTTP_201_CREATED)
