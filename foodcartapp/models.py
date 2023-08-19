@@ -121,7 +121,7 @@ class OrderProduct(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(1000)],
     )
     price = models.DecimalField(
-        max_digits=10,
+        max_digits=6,
         decimal_places=2,
         validators=[MinValueValidator(0)],
     )
