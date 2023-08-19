@@ -158,7 +158,7 @@ class Order(models.Model):
     status = models.PositiveIntegerField(
         verbose_name='статус', choices=STATUS_CHOICES, default=1
     )
-    comment = models.TextField(default='')
+    comment = models.TextField()
     registered_at = models.DateTimeField(
         default=timezone.now, verbose_name='время создания'
     )
