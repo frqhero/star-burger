@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import F, Sum, Q
 from django.utils import timezone
@@ -116,7 +116,10 @@ class OrderProduct(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, verbose_name='товар'
     )
-    quantity = models.PositiveIntegerField(verbose_name='количество')
+    quantity = models.PositiveIntegerField(
+        verbose_name='количество',
+        validators=[MinValueValidator(0), MaxValueValidator(1000)],
+    )
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
