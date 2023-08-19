@@ -1,5 +1,4 @@
 from django import forms
-from django.db.models import Count
 from django.shortcuts import redirect, render
 from django.views import View
 from django.urls import reverse_lazy
@@ -120,20 +119,25 @@ def fetch_coordinates(address):
     except Place.DoesNotExist:
         place = Place(address=address)
         apikey = settings.YANDEX_GEOCODER_TOKEN
-        base_url = "https://geocode-maps.yandex.ru/1.x"
-        response = requests.get(base_url, params={
-            "geocode": address,
-            "apikey": apikey,
-            "format": "json",
-        })
+        base_url = 'https://geocode-maps.yandex.ru/1.x'
+        response = requests.get(
+            base_url,
+            params={
+                'geocode': address,
+                'apikey': apikey,
+                'format': 'json',
+            },
+        )
         response.raise_for_status()
-        found_places = response.json()['response']['GeoObjectCollection']['featureMember']
+        found_places = response.json()['response']['GeoObjectCollection'][
+            'featureMember'
+        ]
 
         if not found_places:
             return None
 
         most_relevant = found_places[0]
-        lon, lat = most_relevant['GeoObject']['Point']['pos'].split(" ")
+        lon, lat = most_relevant['GeoObject']['Point']['pos'].split(' ')
         place.latitude, place.longitude = lat, lon
         place.save()
     return place.latitude, place.longitude
@@ -143,24 +147,18 @@ def fetch_coordinates(address):
 def view_orders(request):
     orders = Order.objects.get_orders()
     for order in orders:
-        order_products = order.products.distinct()
-        restaurants = (
-            Restaurant.objects.filter(
-                menu_items__product__in=order_products,
-                menu_items__availability=True,
-            )
-            .annotate(
-                num_sandwiches=Count('menu_items__product', distinct=True)
-            )
-            .filter(num_sandwiches=len(order_products))
-        )
+        restaurants = Restaurant.objects.get_capable_ones_by_order(order)
         order.restaurants = list(restaurants)
         for restaurant in order.restaurants:
             restaurant_coords = fetch_coordinates(restaurant.address)
             order_coords = fetch_coordinates(order.address)
-            order_distance = round(distance.distance(restaurant_coords, order_coords).km, 2)
+            order_distance = round(
+                distance.distance(restaurant_coords, order_coords).km, 2
+            )
             restaurant.order_distance = order_distance
-        sorted(order.restaurants, key=lambda restaurant: restaurant.order_distance)
+        sorted(
+            order.restaurants, key=lambda restaurant: restaurant.order_distance
+        )
     current_url = request.path
     return render(
         request,

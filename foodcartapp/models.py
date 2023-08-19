@@ -1,8 +1,24 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models import F, Sum, Q
+from django.db.models import F, Sum, Q, Count
 from django.utils import timezone
 from phonenumber_field.modelfields import PhoneNumberField
+
+
+class RestaurantQuerySet(models.QuerySet):
+    def get_capable_ones_by_order(self, order):
+        order_products = order.products.distinct()
+        restaurants = (
+            Restaurant.objects.filter(
+                menu_items__product__in=order_products,
+                menu_items__availability=True,
+            )
+            .annotate(
+                num_sandwiches=Count('menu_items__product', distinct=True)
+            )
+            .filter(num_sandwiches=len(order_products))
+        )
+        return restaurants
 
 
 class Restaurant(models.Model):
@@ -17,6 +33,7 @@ class Restaurant(models.Model):
         max_length=50,
         blank=True,
     )
+    objects = RestaurantQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'ресторан'
