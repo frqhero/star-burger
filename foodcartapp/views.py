@@ -2,6 +2,8 @@ from django.db import transaction
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework import status
 
 from .models import Product, Order, OrderProduct
 from .serializers import OrderDeserializer
@@ -87,11 +89,4 @@ def register_order(request):
 
     serializer = OrderDeserializer(order)
 
-    return JsonResponse(
-        serializer.data,
-        json_dumps_params={
-            'indent': 2,
-            'ensure_ascii': False,
-        },
-        status=201,
-    )
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
