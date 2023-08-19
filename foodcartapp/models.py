@@ -124,7 +124,6 @@ class OrderProduct(models.Model):
         max_digits=10,
         decimal_places=2,
         validators=[MinValueValidator(0)],
-        default=0,
     )
 
 
