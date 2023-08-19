@@ -182,8 +182,3 @@ class Order(models.Model):
         null=True,
         blank=True,
     )
-
-    def clean(self):
-        super().clean()
-        if not self.phonenumber.is_valid():
-            raise ValueError('Not valid phone number')
