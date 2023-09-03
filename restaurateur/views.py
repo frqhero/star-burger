@@ -1,3 +1,4 @@
+import rollbar
 from django import forms
 from django.shortcuts import redirect, render
 from django.views import View
