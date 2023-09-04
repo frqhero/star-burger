@@ -67,6 +67,9 @@ SECRET_KEY=django-insecure-0if40nf4nf93n4
 python manage.py migrate
 ```
 
+Если хотите использовать postgresql, то в .env файл нужно внести переменную `DATABASE_URL`, в следующем формате:
+`postgres://USER:PASSWORD@HOST:PORT/NAME`
+
 Запустите сервер:
 
 ```sh
