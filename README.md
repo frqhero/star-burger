@@ -59,7 +59,7 @@ pip install -r requirements.txt
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```
 
-Определите переменную окружения `ROLLBAR_TOKEN`.
+Определите переменные окружения `ROLLBAR_TOKEN` и `ROLLBAR_ENVIRONMENT_NAME` для работы с `rollbar`.
 
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
