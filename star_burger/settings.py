@@ -131,7 +131,7 @@ YANDEX_GEOCODER_TOKEN=env('YANDEX_GEOCODER_TOKEN')
 if os.getenv('ROLLBAR_TOKEN'):
     ROLLBAR = {
         'access_token': os.getenv('ROLLBAR_TOKEN'),
-        'environment': 'development' if DEBUG else 'production',
+        'environment': os.getenv('ROLLBAR_ENVIRONMENT_NAME') or 'development',
         'code_version': '1.0',
         'root': BASE_DIR,
     }
