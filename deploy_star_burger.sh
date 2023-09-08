@@ -1,5 +1,10 @@
 #!/bin/bash
 set -e
+if [ -z ${ROLLBAR_TOKEN} ]; then
+    echo "ROLLBAR_TOKEN env var not found"
+    exit 1
+fi
+
 working_directory=$(pwd)
 
 echo "~~~cd to /opt/star-burger~~~"
@@ -21,7 +26,7 @@ echo "~~~collect django static~~~"
 venv/bin/python manage.py collectstatic --noinput
 
 echo "~~~django migrate~~~"
-venv/bin/python manage.py migrate
+venv/bin/python manage.py migrate --noinput
 
 echo "~~~restart systemd~~~"
 systemctl restart star_burger.service
@@ -31,7 +36,7 @@ echo "~~~inform rollbar~~~"
 sha=$(git rev-parse HEAD)
 curl --request POST \
      --url https://api.rollbar.com/api/1/deploy \
-     --header 'X-Rollbar-Access-Token: af7e5b6ed3f343fab5b4205e1ba0a24f' \
+     --header "X-Rollbar-Access-Token: ${ROLLBAR_TOKEN}" \
      --header 'accept: application/json' \
      --header 'content-type: application/json' \
      --data '
