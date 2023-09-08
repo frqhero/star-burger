@@ -59,7 +59,8 @@ pip install -r requirements.txt
 SECRET_KEY=django-insecure-0if40nf4nf93n4
 ```
 
-Определите переменные окружения `ROLLBAR_TOKEN` и `ROLLBAR_ENVIRONMENT_NAME` для работы с `rollbar`.
+Определите переменные окружения `ROLLBAR_TOKEN` и `ROLLBAR_ENVIRONMENT_NAME` для работы с `rollbar`.  
+Определите переменную окружения `YANDEX_GEOCODER_TOKEN` для работы сервиса яндекса для определения расстояния между точками на карте.
 
 Создайте файл базы данных SQLite и отмигрируйте её следующей командой:
 
