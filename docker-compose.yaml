@@ -1,0 +1,27 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./assets:/app/assets
+      - ./bundles:/app/bundles
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+  nginx:
+    container_name: nginx
+    image: nginx:1.19.3
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - static_volume:/var/html/static/
+      - media_volume:/var/html/media/
+      - ./media:/media
+
+volumes:
+  static_volume:
+  media_volume:
