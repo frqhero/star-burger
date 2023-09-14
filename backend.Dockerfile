@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.11-slim
 WORKDIR /app
 
 COPY requirements.txt .
@@ -11,4 +11,6 @@ COPY star_burger star_burger
 COPY templates templates
 COPY manage.py manage.py
 
-CMD ["gunicorn", "star_burger.wsgi:application", "--bind", "0:8000"]
+COPY start_backend .
+
+CMD ./start_backend

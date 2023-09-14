@@ -1,8 +1,21 @@
 services:
-  frontend:
-    container_name: frontend
-    build:
-      context: .
-      dockerfile: frontend.Dockerfile
+  db:
+    container_name: db
+    image: postgres:13.0-alpine
+    ports:
+      - "5432:5432"
     volumes:
-      - ./bundles-src:/app/bundles-src
+      - db_volume:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 8080:8080
+
+volumes:
+  db_volume:

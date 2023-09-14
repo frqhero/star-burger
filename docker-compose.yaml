@@ -21,6 +21,18 @@ services:
       - static_volume:/var/html/static/
       - media_volume:/var/html/media/
       - ./media:/media
+    depends_on:
+      - frontend
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    volumes:
+      - ./bundles-src:/app/bundles-src
+      - static_volume:/app/bundles
+    depends_on:
+      - backend
 
 volumes:
   static_volume:
