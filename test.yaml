@@ -1,0 +1,8 @@
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    volumes:
+      - ./bundles-src:/app/bundles-src
