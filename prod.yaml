@@ -1,0 +1,48 @@
+services:
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - ./assets:/app/assets
+      - ./bundles:/app/bundles
+      - ./staticfiles:/app/staticfiles
+      - media_volume:/app/media
+      - ./dump.json:/app/dump.json
+    depends_on:
+      - db
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    volumes:
+      - ./bundles-src:/app/bundles-src
+      - ./staticfiles:/app/bundles
+    depends_on:
+      - backend
+  db:
+    container_name: db
+    image: postgres:13.0-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_volume:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 8080:8080
+
+volumes:
+  static_volume:
+  media_volume:
+  db_volume:
