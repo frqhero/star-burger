@@ -11,6 +11,9 @@ services:
       - ./bundles:/app/bundles
       - static_volume:/app/staticfiles
       - media_volume:/app/media
+      - ./dump.json:/app/dump.json
+    depends_on:
+      - db
   nginx:
     container_name: nginx
     image: nginx:1.19.3
@@ -33,7 +36,25 @@ services:
       - static_volume:/app/bundles
     depends_on:
       - backend
+  db:
+    container_name: db
+    image: postgres:13.0-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_volume:/var/lib/postgresql/data/
+    env_file:
+      - ./.env
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - 8080:8080
 
 volumes:
   static_volume:
   media_volume:
+  db_volume:
