@@ -17,7 +17,7 @@ echo "~~docker compose down~~"
 docker compose -f prod.yaml down
 
 echo "~~docker compose up~~"
-docker compose -f prod.yaml up --build
+docker compose -f prod.yaml up --build -d
 
 echo "~~~inform rollbar~~~"
 sha=$(git rev-parse HEAD)
