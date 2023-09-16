@@ -11,8 +11,8 @@ services:
     volumes:
       - ./assets:/app/assets
       - ./bundles:/app/bundles
-      - ./staticfiles:/app/staticfiles
-      - ./media:/app/media
+      - /var/www/frontend:/app/staticfiles
+      - /var/www/media:/app/media
       - ./dump.json:/app/dump.json
     depends_on:
       - db
@@ -23,7 +23,7 @@ services:
       dockerfile: frontend.Dockerfile
     volumes:
       - ./bundles-src:/app/bundles-src
-      - ./staticfiles:/app/bundles
+      - /var/www/frontend:/app/bundles
     depends_on:
       - backend
   db:
